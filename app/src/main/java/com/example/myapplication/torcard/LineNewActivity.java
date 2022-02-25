@@ -20,6 +20,7 @@ public class LineNewActivity extends Activity {
                 .setMaxCardSizeOnePage(12)
                 .setCardSize(22)
                 .setBigRadiusRatio(2.5f)
+                .setCardStandRation(0.5f)
                 .build(LineNewActivity.this)
                 .show());
   }

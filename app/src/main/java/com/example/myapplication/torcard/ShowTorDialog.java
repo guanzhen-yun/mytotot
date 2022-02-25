@@ -60,14 +60,15 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
   private boolean isFast = false;
   private int maxCardSizeOnePage;
   private int maxDegreeOnePage;
-
   private float bigRadiusRatio; // 卡片外径相对卡片的比例  例如2.5
+  private float cardStandRation; // 中心卡片漏出的比例 例如0.5
 
   public static class Builder {
     private int maxCardSizeOnePage;
     private int maxDegreeOnePage;
     private int cardSize;
     private float bigRadiusRatio;
+    private float cardStandRation;
 
     public Builder setMaxCardSizeOnePage(int maxCardSizeOnePage) {
       this.maxCardSizeOnePage = maxCardSizeOnePage;
@@ -84,6 +85,11 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
       return this;
     }
 
+    public Builder setCardStandRation(float cardStandRation) {
+      this.cardStandRation = cardStandRation;
+      return this;
+    }
+
     public Builder setCardSize(int cardSize) {
       this.cardSize = cardSize;
       return this;
@@ -95,6 +101,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
       showTorDialog.maxDegreeOnePage = maxDegreeOnePage;
       showTorDialog.cardSize = cardSize;
       showTorDialog.bigRadiusRatio = bigRadiusRatio;
+      showTorDialog.cardStandRation = cardStandRation;
       return showTorDialog;
     }
   }
@@ -157,7 +164,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
       }
       LayoutParams layoutParams2 = new LayoutParams(cardWidth, cardHeight);
       layoutParams2.gravity = Gravity.CENTER_HORIZONTAL;
-      layoutParams2.topMargin = cardHeight / 2 - 80;
+      layoutParams2.topMargin = cardHeight / 2;
       layoutParams2.bottomMargin = cardHeight / 2;
       view.setLayoutParams(layoutParams2);
       fl.addView(view);
@@ -329,12 +336,12 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
         if (x < maxX1 && x >= 0) { // 中间的那个
           if (v.getRotation() > 0) { // 小--大 x 越来越小
             float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 3.0f;
+            float f2 = -cardHeight / 2.0f;
             tranY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
             isHandle = true;
           } else { // 大--小 x越来越大
             float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 3.0f;
+            float f2 = -cardHeight / 2.0f;
             tranY = f2 + (x * (f1 - f2) / maxX1);
             isHandle = true;
           }
@@ -343,12 +350,12 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
         if (x < maxX1 && x >= 0) { // 中间的那个
           if (v.getRotation() < 0) { // 小--大 x 越来越小
             float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 3.0f;
+            float f2 = -cardHeight / 2.0f;
             tranY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
             isHandle = true;
           } else { // 大--小 x越来越大
             float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 3.0f;
+            float f2 = -cardHeight / 2.0f;
             tranY = f2 + (x * (f1 - f2) / maxX1);
             isHandle = true;
           }
@@ -400,12 +407,12 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
                         ((bigRadius - cardHeight / 2.0f)
                             - (bigRadius - cardHeight / 2.0f)
                                 * Math.cos(maxDegree * Math.PI / 180));
-                float f2 = -cardHeight / 3.0f;
+                float f2 = -cardHeight / 2.0f;
                 float maxX1 =
                     (float) ((bigRadius - cardHeight / 2.0f) * Math.sin(maxDegree * Math.PI / 180));
                 float x = Math.abs(startX);
                 float startY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
-                float endY = -cardHeight / 3.0f;
+                float endY = -cardHeight / 2.0f;
                 v.setTranslationY(startY + (endY - startY) * current);
               } else {
                 float startY =
@@ -498,7 +505,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
         animation -> {
           float currentValue = (float) animation.getAnimatedValue();
           View v = fl.getChildAt(currentCardIndex);
-          v.setTranslationY(-cardHeight / 3.0f * currentValue);
+          v.setTranslationY(-cardHeight / 2.0f * currentValue);
           if (currentValue == 1 && isMoveLine) {
             lineView.setOnEndListener(this::showMoveText);
             lineView.startAnim();
