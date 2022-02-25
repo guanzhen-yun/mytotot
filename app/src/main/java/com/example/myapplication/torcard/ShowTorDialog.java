@@ -1,11 +1,10 @@
-package com.example.myapplication;
+package com.example.myapplication.torcard;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -13,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -24,9 +24,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import com.example.myapplication.TorCardParent.OnScrollListener;
+import com.example.myapplication.R;
+import com.example.myapplication.torcard.TorCardParent.OnScrollListener;
 
-public class ShowTorDialog extends Dialog {
+public class ShowTorDialog extends Dialog implements CardView.OnClickChildListener {
   private Activity activity;
 
   private TorCardParent fl;
@@ -37,9 +38,10 @@ public class ShowTorDialog extends Dialog {
   private TextView tv_context;
   private TextView tv_pick;
   private ImageView iv_arr;
-  private ImageView iv_dislike;
-  private ImageView iv_like;
+  private View view_back;
   private androidx.cardview.widget.CardView cv_iv;
+  private ConstraintLayout cl_body;
+
   private int cardSize = 22;
   private int cardWidth = 0;
   private int cardHeight = 0;
@@ -54,9 +56,8 @@ public class ShowTorDialog extends Dialog {
   private float maxAngle;
   private float minAngle;
 
+  private int screenHeight;
   private boolean isFast = false;
-  private ConstraintLayout cl_body;
-  private View view_mid;
 
   public ShowTorDialog(@NonNull Context context) {
     super(context, R.style.mydialog);
@@ -74,69 +75,38 @@ public class ShowTorDialog extends Dialog {
     layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
     window.setAttributes(layoutParams);
     setContentView(R.layout.dialog_tor);
-    lineView = findViewById(R.id.lineView);
-    cl_body = findViewById(R.id.cl_body);
-    view_mid = findViewById(R.id.view_card);
-    iv_close = findViewById(R.id.iv_close);
-    tv_context = findViewById(R.id.tv_context);
-    iv_close.setOnClickListener(v -> dismiss());
-    tv_move = findViewById(R.id.tv_move);
-    tv_test = findViewById(R.id.tv_test);
-    tv_pick = findViewById(R.id.tv_pick);
-    iv_arr = findViewById(R.id.iv_arr);
-    iv_dislike = findViewById(R.id.iv_dislike);
-    cv_iv = findViewById(R.id.cv_iv);
-    iv_like = findViewById(R.id.iv_like);
-    iv_dislike.setOnClickListener(v -> translationHor(true));
-    iv_like.setOnClickListener(v -> translationHor(false));
-    Typeface mtypeface = Typeface.createFromAsset(activity.getAssets(), "american.ttf");
-    tv_test.setTypeface(mtypeface);
-    fl = findViewById(R.id.fl_cards);
+    initViews();
     currentCardIndex = cardSize / 2;
     maxAngle = cardSize / 2.0f * maxDegree;
     minAngle = -(cardSize - cardSize / 2.0f - 1) * maxDegree;
     fillChildCard();
     bigRadius = cardHeight * 2.5;
     new Handler().postDelayed(this::openAnim, 500);
+    Display display = activity.getWindowManager().getDefaultDisplay();
+    screenHeight = display.getHeight();
   }
 
-  /** 水平平移卡片 */
-  private void translationHor(boolean isLeft) {
-    cv_iv.setRotation(isLeft ? -5 : 5);
-    cv_iv.setPivotX(isLeft ? cv_iv.getWidth() : 0);
-    cv_iv.setPivotY(cv_iv.getHeight());
-    findViewById(R.id.fl_body).setBackgroundColor(Color.parseColor("#00000000"));
-    ObjectAnimator animator =
-        ObjectAnimator.ofFloat(
-            findViewById(R.id.fl_body),
-            "translationX",
-            0,
-            (isLeft ? (-1) : 1) * cv_iv.getWidth() * 2);
-    animator.setInterpolator(new AccelerateInterpolator());
-    animator.addListener(
-        new AnimatorListener() {
-          @Override
-          public void onAnimationStart(Animator animation) {}
-
-          @Override
-          public void onAnimationEnd(Animator animation) {
-            dismiss();
-          }
-
-          @Override
-          public void onAnimationCancel(Animator animation) {}
-
-          @Override
-          public void onAnimationRepeat(Animator animation) {}
-        });
-    animator.setDuration(500);
-    animator.start();
+  private void initViews() {
+    lineView = findViewById(R.id.lineView);
+    fl = findViewById(R.id.fl_cards);
+    cl_body = findViewById(R.id.cl_body);
+    iv_close = findViewById(R.id.iv_close);
+    tv_context = findViewById(R.id.tv_context);
+    iv_close.setOnClickListener(v -> dismiss());
+    tv_move = findViewById(R.id.tv_move);
+    tv_test = findViewById(R.id.tv_test);
+    Typeface mtypeface = Typeface.createFromAsset(activity.getAssets(), "american.ttf");
+    tv_test.setTypeface(mtypeface);
+    tv_pick = findViewById(R.id.tv_pick);
+    iv_arr = findViewById(R.id.iv_arr);
+    view_back = findViewById(R.id.view_back);
   }
 
   private void fillChildCard() {
     for (int i = 0; i < cardSize; i++) {
       CardView view = new CardView(activity);
       view.setImageResource(R.drawable.bg_card);
+      view.setOnClickChildListener(this);
       if (cardWidth == 0) {
         view.measure(0, 0);
         cardWidth = view.getMeasuredWidth();
@@ -161,12 +131,40 @@ public class ShowTorDialog extends Dialog {
           public void scrollDistance(float newDistance) {
             scrollByDistance(newDistance);
           }
+        });
+  }
+
+  /** 水平平移卡片 */
+  private void translationHor(boolean isLeft) {
+    cv_iv.setRotation(isLeft ? -5 : 5);
+    cv_iv.setPivotX(isLeft ? cv_iv.getWidth() : 0);
+    cv_iv.setPivotY(cv_iv.getHeight());
+    findViewById(R.id.cl_body).setBackgroundColor(Color.parseColor("#00000000"));
+    ObjectAnimator animator =
+        ObjectAnimator.ofFloat(
+            findViewById(R.id.cl_body),
+            "translationX",
+            0,
+            (isLeft ? (-1) : 1) * cv_iv.getWidth() * 2);
+    animator.setInterpolator(new AccelerateInterpolator());
+    animator.addListener(
+        new AnimatorListener() {
+          @Override
+          public void onAnimationStart(Animator animation) {}
 
           @Override
-          public void clickCard() {
-            showChildUpAnim();
+          public void onAnimationEnd(Animator animation) {
+            dismiss();
           }
+
+          @Override
+          public void onAnimationCancel(Animator animation) {}
+
+          @Override
+          public void onAnimationRepeat(Animator animation) {}
         });
+    animator.setDuration(500);
+    animator.start();
   }
 
   private void showChildUpAnim() {
@@ -175,26 +173,30 @@ public class ShowTorDialog extends Dialog {
     ConstraintLayout.LayoutParams layoutParams =
         new ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
-    layoutParams.topToTop = R.id.cl_body;
-    layoutParams.bottomToBottom = R.id.cl_body;
+    layoutParams.topToBottom = R.id.iv_arr;
     layoutParams.leftToLeft = R.id.cl_body;
     layoutParams.rightToRight = R.id.cl_body;
     view.setLayoutParams(layoutParams);
-    view.setTranslationY(160);
     cl_body.addView(view);
     ValueAnimator valueAnimator = ValueAnimator.ofFloat(0, 1);
     valueAnimator.setDuration(500);
+    int[] location = new int[2];
+    iv_arr.getLocationOnScreen(location);
+
+    float tranY =
+        (location[1] + iv_arr.getHeight())
+            + cardHeight / 2.0f
+            - screenHeight / 2.0f
+            - (screenHeight - cl_body.getHeight()) * 8;
+
     valueAnimator.addUpdateListener(
-        new AnimatorUpdateListener() {
-          @Override
-          public void onAnimationUpdate(ValueAnimator animation) {
-            float current = (float) animation.getAnimatedValue();
-            view.setTranslationY(160 + -160 * current);
-            setViewAlpha(
-                1 - current, lineView, tv_move, fl, tv_test, iv_close, tv_context, tv_pick, iv_arr);
-            if (current == 1) {
-              showBigAnim(view);
-            }
+        animation -> {
+          float current = (float) animation.getAnimatedValue();
+          view.setTranslationY(-tranY * current);
+          setViewAlpha(
+              1 - current, lineView, tv_move, fl, tv_test, iv_close, tv_context, tv_pick, iv_arr);
+          if (current == 1) {
+            showBigAnim(view);
           }
         });
     valueAnimator.start();
@@ -207,41 +209,61 @@ public class ShowTorDialog extends Dialog {
   }
 
   private void showBigAnim(View view) {
+    View view_mid = View.inflate(activity, R.layout.layout_mine_card, null);
+    ConstraintLayout.LayoutParams layoutParams =
+        new ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+    layoutParams.topToTop = R.id.cl_body;
+    layoutParams.bottomToBottom = R.id.cl_body;
+    layoutParams.leftToLeft = R.id.cl_body;
+    layoutParams.rightToRight = R.id.cl_body;
+    view_mid.setLayoutParams(layoutParams);
+
+    ImageView iv_like = view_mid.findViewById(R.id.iv_like);
+    cv_iv = view_mid.findViewById(R.id.cv_iv);
+    ImageView iv_dislike = view_mid.findViewById(R.id.iv_dislike);
+    iv_dislike.setOnClickListener(v -> translationHor(true));
+    iv_like.setOnClickListener(v -> translationHor(false));
+    ConstraintLayout cl_card_body = view_mid.findViewById(R.id.cl_card_body);
+
     view_mid.setAlpha(0);
     view_mid.setVisibility(View.VISIBLE);
+    cl_body.addView(view_mid);
+    cl_card_body.postDelayed(
+        () -> {
+          cl_card_body.setScaleX(cardWidth / (cl_card_body.getWidth() * 1.0f));
+          cl_card_body.setScaleY(cardHeight / (cl_card_body.getHeight() * 1.0f));
+          displayBigCardAnim(view, cl_card_body);
+        },
+        200);
+  }
 
+  private void displayBigCardAnim(View view, ConstraintLayout cl_card_body) {
     ObjectAnimator animator3 = ObjectAnimator.ofFloat(view, "rotationY", 0, -90);
     animator3.addUpdateListener(
-        new AnimatorUpdateListener() {
-          @Override
-          public void onAnimationUpdate(ValueAnimator animation) {
-            float f = (float) animation.getAnimatedValue();
-            if (f == -90) {
-              view_mid.setRotationY(-270);
-              view_mid.setAlpha(1);
-              view_mid.setScaleX(view.getWidth() / (view_mid.getWidth() * 1.0f));
-              view_mid.setScaleY(view.getHeight() / (view_mid.getHeight() * 1.0f));
-              ObjectAnimator animator3 = ObjectAnimator.ofFloat(view_mid, "rotationY", -270, -360);
-              animator3.addUpdateListener(
-                  new AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animation) {
-                      if ((float) animation.getAnimatedValue() <= -272) {
-                        cl_body.setVisibility(View.GONE);
-                      }
-                    }
-                  });
-              ObjectAnimator animator4 =
-                  ObjectAnimator.ofFloat(
-                      view_mid, "scaleX", view.getWidth() / (view_mid.getWidth() * 1.0f), 1);
-              ObjectAnimator animator5 =
-                  ObjectAnimator.ofFloat(
-                      view_mid, "scaleY", view.getHeight() / (view_mid.getHeight() * 1.0f), 1);
-              AnimatorSet set = new AnimatorSet();
-              set.playTogether(animator3, animator4, animator5);
-              set.setDuration(300);
-              set.start();
-            }
+        animation -> {
+          float f = (float) animation.getAnimatedValue();
+          if (f == -90) {
+            cl_card_body.setRotationY(-270);
+            cl_card_body.setAlpha(1);
+            ObjectAnimator animator31 =
+                ObjectAnimator.ofFloat(cl_card_body, "rotationY", -270, -360);
+            animator31.addUpdateListener(
+                animation1 -> {
+                  if ((float) animation1.getAnimatedValue() <= -272) {
+                    view_back.setAlpha(0);
+                  }
+                });
+            ObjectAnimator animator4 =
+                ObjectAnimator.ofFloat(
+                    cl_card_body, "scaleX", cardWidth / (cl_card_body.getWidth() * 1.0f), 1);
+            ObjectAnimator animator5 =
+                ObjectAnimator.ofFloat(
+                    cl_card_body, "scaleY", cardHeight / (cl_card_body.getHeight() * 1.0f), 1);
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(animator31, animator4, animator5);
+            set.setDuration(300);
+            set.start();
           }
         });
     animator3.setDuration(300);
@@ -445,7 +467,13 @@ public class ShowTorDialog extends Dialog {
 
   private void showMoveText() {
     ObjectAnimator animator = ObjectAnimator.ofFloat(tv_move, "alpha", 0, 1);
-    animator.setDuration(500);
+    animator.setDuration(300);
+    animator.addUpdateListener(
+        animation -> {
+          if ((float) animation.getAnimatedValue() == 1) {
+            fl.setCanClickMid(true);
+          }
+        });
     animator.start();
   }
 
@@ -465,5 +493,10 @@ public class ShowTorDialog extends Dialog {
   private float getInitRotation(int i) {
     int mid = cardSize / 2;
     return (i - mid) * maxDegree;
+  }
+
+  @Override
+  public void clickChild() {
+    showChildUpAnim();
   }
 }

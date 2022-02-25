@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.torcard;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -11,8 +11,7 @@ import androidx.annotation.Nullable;
 public class TorCardParent extends FrameLayout {
   private VelocityTracker mVelocityTracker;
   private float downX;
-  private float initX;
-  private float initY;
+  private boolean isCanClickMid;
 
   public TorCardParent(@NonNull Context context) {
     super(context);
@@ -38,8 +37,6 @@ public class TorCardParent extends FrameLayout {
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
         downX = event.getX();
-        initX = event.getX();
-        initY = event.getY();
         break;
       case MotionEvent.ACTION_MOVE:
         float newDistance = event.getX() - downX;
@@ -48,19 +45,10 @@ public class TorCardParent extends FrameLayout {
         break;
       case MotionEvent.ACTION_UP:
         mVelocityTracker.computeCurrentVelocity(200);
-        if (Math.abs(initX - event.getX()) <= 5 && initY <= dp2px(getContext(), 260)) {
-          mOnScrollListener.clickCard();
-        } else {
-          mOnScrollListener.handlePAnimScroll(mVelocityTracker.getXVelocity());
-        }
+        mOnScrollListener.handlePAnimScroll(mVelocityTracker.getXVelocity());
         break;
     }
     return true;
-  }
-
-  private int dp2px(Context context, float dpValue) {
-    final float scale = context.getResources().getDisplayMetrics().density;
-    return (int) (dpValue * scale + 0.5f);
   }
 
   private OnScrollListener mOnScrollListener;
@@ -69,11 +57,17 @@ public class TorCardParent extends FrameLayout {
     this.mOnScrollListener = onScrollListener;
   }
 
+  public boolean isCanClickMid() {
+    return isCanClickMid;
+  }
+
+  public void setCanClickMid(boolean canClickMid) {
+    isCanClickMid = canClickMid;
+  }
+
   public interface OnScrollListener {
     void handlePAnimScroll(float xVelocity);
 
     void scrollDistance(float newDistance);
-
-    void clickCard();
   }
 }

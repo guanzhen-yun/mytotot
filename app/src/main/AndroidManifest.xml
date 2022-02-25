@@ -12,7 +12,7 @@
     android:theme="@style/Theme.MyApplication"
     android:usesCleartextTraffic="true">
     <activity
-      android:name=".LineNewActivity"
+      android:name=".torcard.LineNewActivity"
       android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

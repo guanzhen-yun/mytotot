@@ -75,7 +75,7 @@
     app:layout_constraintTop_toBottomOf="@id/iv_arr"
     tools:layout_height="300dp" />
 
-  <com.example.myapplication.LineView
+  <com.example.myapplication.torcard.LineView
     android:id="@+id/lineView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"

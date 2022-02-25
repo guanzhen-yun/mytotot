@@ -18,7 +18,9 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import com.example.myapplication.LineView.OnEndListener;
+import com.example.myapplication.torcard.CardView;
+import com.example.myapplication.torcard.LineView;
+import com.example.myapplication.torcard.LineView.OnEndListener;
 
 public class LineActivity extends Activity {
   private VelocityTracker mVelocityTracker;

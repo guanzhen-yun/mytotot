@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.torcard;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import androidx.annotation.Nullable;
+import com.example.myapplication.R;
 
 public class LineNewActivity extends Activity {
   @Override

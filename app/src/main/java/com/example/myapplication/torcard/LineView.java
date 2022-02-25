@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.example.myapplication.torcard;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -160,7 +160,7 @@ public class LineView extends View {
     }
   }
 
-  interface OnEndListener {
+  public interface OnEndListener {
     void onEnd();
   }
 }
