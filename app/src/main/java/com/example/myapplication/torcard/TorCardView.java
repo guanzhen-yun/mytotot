@@ -6,7 +6,7 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
 /** 塔罗子牌 */
-public class CardView extends androidx.appcompat.widget.AppCompatImageView {
+public class TorCardView extends androidx.appcompat.widget.AppCompatImageView {
   private float lastestTranX;
   private float lastestTranY;
   private float lastestRotation;
@@ -14,15 +14,15 @@ public class CardView extends androidx.appcompat.widget.AppCompatImageView {
 
   private float downX;
 
-  public CardView(Context context) {
+  public TorCardView(Context context) {
     super(context);
   }
 
-  public CardView(Context context, @Nullable AttributeSet attrs) {
+  public TorCardView(Context context, @Nullable AttributeSet attrs) {
     super(context, attrs);
   }
 
-  public CardView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+  public TorCardView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
     super(context, attrs, defStyleAttr);
   }
 

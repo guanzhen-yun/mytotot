@@ -18,9 +18,9 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
-import com.example.myapplication.torcard.CardView;
 import com.example.myapplication.torcard.LineView;
 import com.example.myapplication.torcard.LineView.OnEndListener;
+import com.example.myapplication.torcard.TorCardView;
 
 public class LineActivity extends Activity {
   private VelocityTracker mVelocityTracker;
@@ -61,7 +61,7 @@ public class LineActivity extends Activity {
     currentCardIndex = cardSize / 2;
 
     for (int i = 0; i < cardSize; i++) {
-      CardView view = new CardView(this);
+      TorCardView view = new TorCardView(this);
       view.setImageResource(R.drawable.bg_card);
       if (cardWidth == 0) {
         view.measure(0, 0);

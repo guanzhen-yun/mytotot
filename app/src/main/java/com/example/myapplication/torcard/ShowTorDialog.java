@@ -28,7 +28,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.torcard.TorCardParent.OnScrollListener;
 
 /** 塔罗弹框 */
-public class ShowTorDialog extends Dialog implements CardView.OnClickChildListener {
+public class ShowTorDialog extends Dialog implements TorCardView.OnClickChildListener {
   private final Activity activity;
 
   private TorCardParent fl;
@@ -167,7 +167,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
   /** 填充子卡片 */
   private void fillChildCard() {
     for (int i = 0; i < cardSize; i++) {
-      CardView view = new CardView(activity);
+      TorCardView view = new TorCardView(activity);
       view.setImageResource(R.drawable.bg_card);
       view.setOnClickChildListener(this);
       if (cardWidth == 0) {
@@ -231,7 +231,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
   }
 
   private void showChildUpAnim() {
-    CardView view = new CardView(activity);
+    TorCardView view = new TorCardView(activity);
     view.setImageResource(R.drawable.bg_card);
     ConstraintLayout.LayoutParams layoutParams =
         new ConstraintLayout.LayoutParams(
