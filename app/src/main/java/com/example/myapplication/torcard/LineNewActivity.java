@@ -2,8 +2,6 @@ package com.example.myapplication.torcard;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import androidx.annotation.Nullable;
 import com.example.myapplication.R;
@@ -16,12 +14,13 @@ public class LineNewActivity extends Activity {
     Button btn_seprate = findViewById(R.id.btn_seprate);
 
     btn_seprate.setOnClickListener(
-        new OnClickListener() {
-          @Override
-          public void onClick(View v) {
-            ShowTorDialog dialog = new ShowTorDialog(LineNewActivity.this);
-            dialog.show();
-          }
-        });
+        v ->
+            new ShowTorDialog.Builder()
+                .setMaxDegreeOnePage(75)
+                .setMaxCardSizeOnePage(12)
+                .setCardSize(22)
+                .setBigRadiusRatio(2.5f)
+                .build(LineNewActivity.this)
+                .show());
   }
 }

@@ -28,7 +28,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.torcard.TorCardParent.OnScrollListener;
 
 public class ShowTorDialog extends Dialog implements CardView.OnClickChildListener {
-  private Activity activity;
+  private final Activity activity;
 
   private TorCardParent fl;
   private LineView lineView;
@@ -42,14 +42,14 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
   private androidx.cardview.widget.CardView cv_iv;
   private ConstraintLayout cl_body;
 
-  private int cardSize = 22;
+  private int cardSize;
   private int cardWidth = 0;
   private int cardHeight = 0;
 
   private double bigRadius;
 
-  // 90度10张卡片 一个圈40张卡片 每张卡片旋转9度
-  private float maxDegree = 75 / 12.0f;
+  // 75度12张卡片 一个圈40张卡片 每张卡片旋转9度
+  private float maxDegree;
 
   private int currentCardIndex; // 当前卡片位置
   private float mPreDistance; // 上一次滑动的距离
@@ -58,6 +58,46 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
 
   private int screenHeight;
   private boolean isFast = false;
+  private int maxCardSizeOnePage;
+  private int maxDegreeOnePage;
+
+  private float bigRadiusRatio; // 卡片外径相对卡片的比例  例如2.5
+
+  public static class Builder {
+    private int maxCardSizeOnePage;
+    private int maxDegreeOnePage;
+    private int cardSize;
+    private float bigRadiusRatio;
+
+    public Builder setMaxCardSizeOnePage(int maxCardSizeOnePage) {
+      this.maxCardSizeOnePage = maxCardSizeOnePage;
+      return this;
+    }
+
+    public Builder setMaxDegreeOnePage(int maxDegreeOnePage) {
+      this.maxDegreeOnePage = maxDegreeOnePage;
+      return this;
+    }
+
+    public Builder setBigRadiusRatio(float bigRadiusRatio) {
+      this.bigRadiusRatio = bigRadiusRatio;
+      return this;
+    }
+
+    public Builder setCardSize(int cardSize) {
+      this.cardSize = cardSize;
+      return this;
+    }
+
+    public ShowTorDialog build(Context context) {
+      ShowTorDialog showTorDialog = new ShowTorDialog(context);
+      showTorDialog.maxCardSizeOnePage = maxCardSizeOnePage;
+      showTorDialog.maxDegreeOnePage = maxDegreeOnePage;
+      showTorDialog.cardSize = cardSize;
+      showTorDialog.bigRadiusRatio = bigRadiusRatio;
+      return showTorDialog;
+    }
+  }
 
   public ShowTorDialog(@NonNull Context context) {
     super(context, R.style.mydialog);
@@ -76,11 +116,12 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
     window.setAttributes(layoutParams);
     setContentView(R.layout.dialog_tor);
     initViews();
+    maxDegree = maxDegreeOnePage * 1.0f / maxCardSizeOnePage;
     currentCardIndex = cardSize / 2;
     maxAngle = cardSize / 2.0f * maxDegree;
     minAngle = -(cardSize - cardSize / 2.0f - 1) * maxDegree;
     fillChildCard();
-    bigRadius = cardHeight * 2.5;
+    bigRadius = cardHeight * bigRadiusRatio;
     new Handler().postDelayed(this::openAnim, 500);
     Display display = activity.getWindowManager().getDefaultDisplay();
     screenHeight = display.getHeight();
@@ -93,6 +134,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
     iv_close = findViewById(R.id.iv_close);
     tv_context = findViewById(R.id.tv_context);
     iv_close.setOnClickListener(v -> dismiss());
+    cl_body.setOnClickListener(v -> dismiss());
     tv_move = findViewById(R.id.tv_move);
     tv_test = findViewById(R.id.tv_test);
     Typeface mtypeface = Typeface.createFromAsset(activity.getAssets(), "american.ttf");
@@ -100,6 +142,7 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
     tv_pick = findViewById(R.id.tv_pick);
     iv_arr = findViewById(R.id.iv_arr);
     view_back = findViewById(R.id.view_back);
+    view_back.setOnClickListener(v -> {});
   }
 
   private void fillChildCard() {
