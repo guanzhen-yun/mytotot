@@ -27,6 +27,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import com.example.myapplication.R;
 import com.example.myapplication.torcard.TorCardParent.OnScrollListener;
 
+/** 塔罗弹框 */
 public class ShowTorDialog extends Dialog implements CardView.OnClickChildListener {
   private final Activity activity;
 
@@ -114,6 +115,14 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    beforeDialog();
+    setContentView(R.layout.dialog_tor);
+    initViews();
+    initDatas();
+  }
+
+  /** dialog之前属性设置 */
+  private void beforeDialog() {
     Window window = getWindow();
     window.setGravity(Gravity.BOTTOM);
     window.getDecorView().setPadding(0, 0, 0, 0);
@@ -121,19 +130,9 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
     layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
     layoutParams.height = WindowManager.LayoutParams.MATCH_PARENT;
     window.setAttributes(layoutParams);
-    setContentView(R.layout.dialog_tor);
-    initViews();
-    maxDegree = maxDegreeOnePage * 1.0f / maxCardSizeOnePage;
-    currentCardIndex = cardSize / 2;
-    maxAngle = cardSize / 2.0f * maxDegree;
-    minAngle = -(cardSize - cardSize / 2.0f - 1) * maxDegree;
-    fillChildCard();
-    bigRadius = cardHeight * bigRadiusRatio;
-    new Handler().postDelayed(this::openAnim, 500);
-    Display display = activity.getWindowManager().getDefaultDisplay();
-    screenHeight = display.getHeight();
   }
 
+  /** 初始化布局和点击事件 */
   private void initViews() {
     lineView = findViewById(R.id.lineView);
     fl = findViewById(R.id.fl_cards);
@@ -152,6 +151,20 @@ public class ShowTorDialog extends Dialog implements CardView.OnClickChildListen
     view_back.setOnClickListener(v -> {});
   }
 
+  /** 初始化数据 */
+  private void initDatas() {
+    maxDegree = maxDegreeOnePage * 1.0f / maxCardSizeOnePage;
+    currentCardIndex = cardSize / 2;
+    maxAngle = cardSize / 2.0f * maxDegree;
+    minAngle = -(cardSize - cardSize / 2.0f - 1) * maxDegree;
+    fillChildCard();
+    bigRadius = cardHeight * bigRadiusRatio;
+    new Handler().postDelayed(this::openAnim, 500);
+    Display display = activity.getWindowManager().getDefaultDisplay();
+    screenHeight = display.getHeight();
+  }
+
+  /** 填充子卡片 */
   private void fillChildCard() {
     for (int i = 0; i < cardSize; i++) {
       CardView view = new CardView(activity);

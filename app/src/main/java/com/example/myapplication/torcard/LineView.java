@@ -12,6 +12,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import androidx.annotation.Nullable;
 
+/** 塔罗牌弧线 */
 public class LineView extends View {
   private Paint mPointPaint;
   private float marginLeft = 30.0f; // 左边的间距

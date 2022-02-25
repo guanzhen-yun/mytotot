@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 
+/** 塔罗子牌 */
 public class CardView extends androidx.appcompat.widget.AppCompatImageView {
   private float lastestTranX;
   private float lastestTranY;

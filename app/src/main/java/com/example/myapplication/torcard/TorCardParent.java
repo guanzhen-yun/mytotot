@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+/** 塔罗父布局控件 */
 public class TorCardParent extends FrameLayout {
   private VelocityTracker mVelocityTracker;
   private float downX;

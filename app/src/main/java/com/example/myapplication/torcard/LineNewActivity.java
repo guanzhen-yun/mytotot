@@ -6,6 +6,7 @@ import android.widget.Button;
 import androidx.annotation.Nullable;
 import com.example.myapplication.R;
 
+/** 塔罗牌入口 */
 public class LineNewActivity extends Activity {
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
