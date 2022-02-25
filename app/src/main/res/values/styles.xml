@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+  <style name="mydialog" parent="@android:style/Theme.Holo.Dialog">
+    <!-- 是否有边框 -->
+    <item name="android:windowFrame">@null</item>
+    <!--是否在悬浮Activity之上  -->
+    <item name="android:windowIsFloating">true</item>
+    <!--标题  -->
+    <item name="android:windowNoTitle">true</item>
+    <!--阴影  -->
+    <item name="android:windowIsTranslucent">true</item>
+    <!--透明背景-->
+    <item name="android:background">@android:color/transparent</item>
+    <!--窗口背景透明-->
+    <item name="android:windowBackground">@android:color/transparent</item>
+    <!--弹窗背景是否变暗-->
+    <item name="android:backgroundDimEnabled">false</item>
+    <item name="android:windowAnimationStyle">@style/AnimTop</item>
+
+  </style>
+
+  <style name="AnimTop" parent="android:Animation">
+    <!--进入动画-->
+    <item name="android:windowEnterAnimation">@anim/dialog_top_in</item>
+    <!--退出动画-->
+    <item name="android:windowExitAnimation">@anim/dialog_top_out</item>
+  </style>
+
+  <style name="style_tag">
+    <item name="android:paddingBottom">3dp</item>
+    <item name="android:paddingTop">3dp</item>
+    <item name="android:paddingLeft">10dp</item>
+    <item name="android:paddingRight">10dp</item>
+    <item name="android:textColor">#ffe19a</item>
+    <item name="android:textSize">10sp</item>
+    <item name="android:layout_width">wrap_content</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:background">@drawable/bg_tag</item>
+  </style>
+</resources>

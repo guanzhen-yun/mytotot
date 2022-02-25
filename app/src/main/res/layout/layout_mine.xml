@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent">
+
+  <ImageView
+    android:id="@+id/iv_pic"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_pic"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/tv_desc"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:layout_marginTop="-21dp"
+    android:layout_marginRight="20dp"
+    android:text="3月3日起，每晚9-11點，探探塔羅占卜營業，劃到某張卡後就會觸發。抽取一張獲得今日的愛情運勢，還有一位意想不到的緣分推薦。"
+    android:textColor="#ff0000"
+    app:layout_constraintTop_toBottomOf="@id/iv_pic" />
+
+  <View
+    android:id="@+id/view_line"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:layout_constraintBottom_toTopOf="@+id/tv_name"
+    app:layout_constraintTop_toTopOf="parent" />
+
+  <TextView
+    android:id="@+id/tv_name"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:text="探探塔罗"
+    android:textSize="30sp"
+    app:layout_constraintBottom_toTopOf="@+id/tv_time"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/view_line" />
+
+  <TextView
+    android:id="@+id/tv_time"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="20dp"
+    android:layout_marginTop="10dp"
+    android:text="营业中"
+    android:textSize="16sp"
+    app:layout_constraintBottom_toTopOf="@+id/view_line2"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tv_name" />
+
+  <View
+    android:id="@+id/view_line2"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:layout_constraintBottom_toTopOf="@+id/tv_desc"
+    app:layout_constraintTop_toBottomOf="@id/tv_time" />
+</androidx.constraintlayout.widget.ConstraintLayout>
