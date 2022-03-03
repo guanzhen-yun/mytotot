@@ -31,6 +31,7 @@ public class TorCardParent extends FrameLayout {
     if (event.getAction() == MotionEvent.ACTION_DOWN && event.getEdgeFlags() != 0) {
       return false;
     }
+
     if (null == mVelocityTracker) {
       mVelocityTracker = VelocityTracker.obtain(); // 手指抬起之后的速度变化
     }

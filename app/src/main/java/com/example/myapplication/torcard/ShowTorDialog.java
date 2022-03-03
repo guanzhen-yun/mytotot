@@ -54,11 +54,10 @@ public class ShowTorDialog extends Dialog implements TorCardView.OnClickChildLis
 
   private int currentCardIndex; // 当前卡片位置
   private float mPreDistance; // 上一次滑动的距离
-  private float maxAngle;
-  private float minAngle;
+  private float maxAngle; // 最大旋转角度
+  private float minAngle; // 最小旋转角度
 
   private int screenHeight;
-  private boolean isFast = false;
   private int maxCardSizeOnePage;
   private int maxDegreeOnePage;
   private float bigRadiusRatio; // 卡片外径相对卡片的比例  例如2.5
@@ -197,6 +196,133 @@ public class ShowTorDialog extends Dialog implements TorCardView.OnClickChildLis
         });
   }
 
+  /** 塔罗展开卡片动画 */
+  private void openAnim() {
+    ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
+    animator.addUpdateListener(
+        animation -> {
+          float currentValue = (float) animation.getAnimatedValue();
+          for (int i = 0; i < cardSize; i++) {
+            if (i == currentCardIndex) continue;
+            TorCardView v = (TorCardView) fl.getChildAt(i);
+            v.setRotation(maxDegree * (i - currentCardIndex) * currentValue);
+            v.setTranslationX(getTransX(i - currentCardIndex, currentValue));
+            v.setTranslationY(getTransY(Math.abs(i - currentCardIndex), currentValue));
+            saveLatestAttr(v);
+          }
+          // 当卡片展开中间卡片凸起
+          if (currentValue == 1) {
+            midStand();
+          }
+        });
+    animator.setDuration(500);
+    animator.start();
+  }
+
+  /** 保存卡片上次的属性 */
+  private void saveLatestAttr(TorCardView v) {
+    v.setLastestRotation(v.getRotation());
+    v.setLastestTranX(v.getLastestTranX());
+    v.setLastestTranY(v.getTranslationY());
+  }
+
+  /** 中间卡片弹出动画 isMoveLine 中间卡片弹出动画执行完是否需要播放弧线动画 */
+  private void midStand() {
+    float maxCardTran = -cardHeight * cardStandRation;
+    TorCardView v = (TorCardView) fl.getChildAt(currentCardIndex);
+    ObjectAnimator animator = ObjectAnimator.ofFloat(v, "translationY", 0, maxCardTran);
+    animator.addUpdateListener(
+        animation -> {
+          float currentValue = (float) animation.getAnimatedValue();
+          // 当中间卡片弹出动画执行完 播放弧线动画
+          if (currentValue == maxCardTran) {
+            saveLatestAttr(v);
+            lineView.setOnEndListener(this::showMoveText);
+            lineView.startAnim();
+          }
+        });
+    animator.setDuration(300);
+    animator.start();
+  }
+
+  /** 弧线动画播放完播放下方文字展示动画 */
+  private void showMoveText() {
+    ObjectAnimator animator = ObjectAnimator.ofFloat(tv_move, "alpha", 0, 1);
+    animator.setDuration(300);
+    animator.addUpdateListener(
+        animation -> {
+          if ((float) animation.getAnimatedValue() == 1) {
+            // 文字动画播放完 此时可以点击中间卡片了
+            fl.setCanClickMid(true);
+          }
+        });
+    animator.start();
+  }
+
+  /** 跟随手指滑动卡片 */
+  private void scrollByDistance(float distance) {
+    mPreDistance += distance;
+    float m = getNewRotationDegree(); // 最新的旋转角度
+    float r = (float) (bigRadius - cardHeight / 2.0f);
+    for (int i = 0; i < cardSize; i++) {
+      TorCardView v = (TorCardView) fl.getChildAt(i);
+      v.setRotation(getInitRotation(i) + m);
+      float currentRotation = getInitRotation(i) + m;
+      float cR = getCurrentRadius(currentRotation);
+      v.setTranslationX((float) (cR * Math.sin(currentRotation * Math.PI / 180.0f)));
+      v.setTranslationY((float) (r - cR * Math.cos(currentRotation * Math.PI / 180.0f)));
+      saveLatestAttr(v);
+    }
+  }
+
+  private float getCurrentRadius(float currentRotation) {
+    float rMax = (float) (bigRadius);
+    float r = (float) (bigRadius - cardHeight / 2.0f);
+    float cR;
+    if (Math.abs(currentRotation) <= maxDegree) {
+      float f = Math.abs(currentRotation);
+      cR = rMax - (rMax - r) / maxDegree * f;
+    } else {
+      cR = r;
+    }
+    return cR;
+  }
+
+  /** 松开手指滑动处理 */
+  private void handleAnimScroll(float xVelocity) {
+    float startAngle = getNewRotationDegree(); // 松开手指时的角度
+    mPreDistance += xVelocity / 8;
+    float start2 = getNewRotationDegree(); // 应该旋转到的角度
+    float endAngle = getEndAngle(start2); // 最终定格的角度
+    float r = (float) (bigRadius - cardHeight / 2.0f);
+    if (startAngle != endAngle) {
+      ValueAnimator scrollAnimator = ValueAnimator.ofFloat(0, 1);
+      scrollAnimator.setDuration(300);
+      scrollAnimator.setInterpolator(new DecelerateInterpolator());
+      scrollAnimator.addUpdateListener(
+          animation -> {
+            float current = (float) animation.getAnimatedValue();
+            for (int i = 0; i < cardSize; i++) {
+              TorCardView v = (TorCardView) fl.getChildAt(i);
+              float currentRotation = v.getLastestRotation() + (endAngle - startAngle) * current;
+              v.setRotation(currentRotation);
+              float cR = getCurrentRadius(currentRotation);
+              v.setTranslationX((float) (cR * Math.sin(currentRotation * Math.PI / 180.0f)));
+              v.setTranslationY((float) (r - cR * Math.cos(currentRotation * Math.PI / 180.0f)));
+            }
+            if (current == 1) {
+              mPreDistance = (float) (2 * Math.PI * r * endAngle) / 360;
+              for (int i = 0; i < cardSize; i++) {
+                TorCardView v = (TorCardView) fl.getChildAt(i);
+                saveLatestAttr(v);
+              }
+            }
+          });
+
+      scrollAnimator.start();
+    }
+  }
+
   /** 水平平移卡片 */
   private void translationHor(boolean isLeft) {
     cv_iv.setRotation(isLeft ? -5 : 5);
@@ -333,134 +459,6 @@ public class ShowTorDialog extends Dialog implements TorCardView.OnClickChildLis
     animator3.start();
   }
 
-  private void scrollByDistance(float distance) {
-    mPreDistance += distance;
-    float m = getNewRotationDegree();
-    for (int i = 0; i < cardSize; i++) {
-      View v = fl.getChildAt(i);
-      v.setRotation(getInitRotation(i) + m);
-      v.setTranslationX(getNewTranX(v));
-      float x = Math.abs(v.getTranslationX());
-      boolean isHandle = false;
-      float tranY = 0;
-      float radius = (float) (bigRadius - cardHeight / 2.0f);
-      float maxX1 = (float) (radius * Math.sin(maxDegree * Math.PI / 180));
-      if (mPreDistance < 0) { // 向左 找到当前的和 右的
-        if (x < maxX1 && x >= 0) { // 中间的那个
-          if (v.getRotation() > 0) { // 小--大 x 越来越小
-            float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 2.0f;
-            tranY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
-            isHandle = true;
-          } else { // 大--小 x越来越大
-            float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 2.0f;
-            tranY = f2 + (x * (f1 - f2) / maxX1);
-            isHandle = true;
-          }
-        }
-      } else { // 向右 找到当前的 和 左的
-        if (x < maxX1 && x >= 0) { // 中间的那个
-          if (v.getRotation() < 0) { // 小--大 x 越来越小
-            float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 2.0f;
-            tranY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
-            isHandle = true;
-          } else { // 大--小 x越来越大
-            float f1 = (float) (radius - radius * Math.cos(maxDegree * Math.PI / 180));
-            float f2 = -cardHeight / 2.0f;
-            tranY = f2 + (x * (f1 - f2) / maxX1);
-            isHandle = true;
-          }
-        }
-      }
-      if (!isHandle) {
-        tranY =
-            (float)
-                (bigRadius
-                    - cardHeight / 2.0f
-                    - (bigRadius - cardHeight / 2.0f)
-                        * (Math.cos(Math.abs(v.getRotation() * Math.PI / 180))));
-      }
-      v.setTranslationY(tranY);
-    }
-  }
-
-  /** 松开手指滑动处理 */
-  private void handleAnimScroll(float xVelocity) {
-    float startAngle = getNewRotationDegree();
-    mPreDistance += xVelocity / 11;
-    if (Math.abs(xVelocity) > 100) {
-      isFast = true;
-    }
-    float start2 = getNewRotationDegree();
-    float endAngle = getEndAngle(start2);
-    if (startAngle != endAngle) {
-      ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-      animator.setDuration(500);
-      animator.setInterpolator(new DecelerateInterpolator());
-      animator.addUpdateListener(
-          animation -> {
-            float current = (float) animation.getAnimatedValue();
-            for (int i = 0; i < cardSize; i++) {
-              View v = fl.getChildAt(i);
-              v.setRotation(getInitRotation(i) + startAngle + (endAngle - startAngle) * current);
-              float startX =
-                  (float)
-                      ((bigRadius - cardHeight / 2.0f)
-                          * Math.sin((getInitRotation(i) + startAngle) * Math.PI / 180));
-              float endX =
-                  (float)
-                      ((bigRadius - cardHeight / 2.0f)
-                          * Math.sin((getInitRotation(i) + endAngle) * Math.PI / 180));
-              v.setTranslationX(startX + (endX - startX) * current);
-              if (endX == 0 && !isFast) {
-                float f1 =
-                    (float)
-                        ((bigRadius - cardHeight / 2.0f)
-                            - (bigRadius - cardHeight / 2.0f)
-                                * Math.cos(maxDegree * Math.PI / 180));
-                float f2 = -cardHeight / 2.0f;
-                float maxX1 =
-                    (float) ((bigRadius - cardHeight / 2.0f) * Math.sin(maxDegree * Math.PI / 180));
-                float x = Math.abs(startX);
-                float startY = f1 + ((maxX1 - x) * (f2 - f1) / maxX1);
-                float endY = -cardHeight / 2.0f;
-                v.setTranslationY(startY + (endY - startY) * current);
-              } else {
-                float startY =
-                    (float)
-                        ((bigRadius - cardHeight / 2.0f)
-                            - (bigRadius - cardHeight / 2.0f)
-                                * Math.cos((startAngle + getInitRotation(i)) * Math.PI / 180));
-                float endY =
-                    (float)
-                        ((bigRadius - cardHeight / 2.0f)
-                            - (bigRadius - cardHeight / 2.0f)
-                                * Math.cos((endAngle + getInitRotation(i)) * Math.PI / 180));
-                v.setTranslationY(startY + (endY - startY) * current);
-              }
-            }
-
-            if (current == 1) {
-              mPreDistance =
-                  (float) ((bigRadius - cardHeight / 2.0f) * Math.sin(endAngle * Math.PI / 180));
-              if (isFast) {
-                for (int i = 0; i < cardSize; i++) {
-                  if (fl.getChildAt(i).getRotation() == 0) {
-                    currentCardIndex = i;
-                    break;
-                  }
-                }
-                midStand(false);
-              }
-              isFast = false;
-            }
-          });
-      animator.start();
-    }
-  }
-
   private float getEndAngle(float startAngle) {
     if (startAngle <= minAngle) {
       return minAngle;
@@ -478,66 +476,17 @@ public class ShowTorDialog extends Dialog implements TorCardView.OnClickChildLis
   }
 
   private float getNewRotationDegree() {
-    if (mPreDistance > bigRadius - cardHeight / 2.0f) {
-      mPreDistance = (float) (bigRadius - cardHeight / 2.0f);
-    } else if (mPreDistance < cardHeight / 2.0f - bigRadius) {
-      mPreDistance = (float) (cardHeight / 2.0f - bigRadius);
+    float r = (float) (bigRadius - cardHeight / 2.0f);
+    float newRotation = (float) (mPreDistance * 360 / (2 * Math.PI * r));
+    if (newRotation > maxAngle) {
+      mPreDistance = (float) (maxAngle * 2 * Math.PI * r / 360);
+      return maxAngle;
     }
-    float angle = (float) Math.asin(mPreDistance / (bigRadius - cardHeight / 2.0f));
-    return (float) (angle * 180 / Math.PI);
-  }
-
-  private float getNewTranX(View v) {
-    float rotation = v.getRotation();
-    return (float) (Math.sin(rotation * Math.PI / 180) * (bigRadius - cardHeight / 2.0f));
-  }
-
-  public void openAnim() {
-    ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-    animator.addUpdateListener(
-        animation -> {
-          float currentValue = (float) animation.getAnimatedValue();
-          for (int i = 0; i < cardSize; i++) {
-            if (i == currentCardIndex) continue;
-            View v = fl.getChildAt(i);
-            v.setRotation(maxDegree * (i - currentCardIndex) * currentValue);
-            v.setTranslationX(getTransX(i - currentCardIndex, currentValue));
-            v.setTranslationY(getTransY(Math.abs(i - currentCardIndex), currentValue));
-          }
-          if (currentValue == 1) {
-            midStand(true);
-          }
-        });
-    animator.setDuration(500);
-    animator.start();
-  }
-
-  private void midStand(boolean isMoveLine) {
-    ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-    animator.addUpdateListener(
-        animation -> {
-          float currentValue = (float) animation.getAnimatedValue();
-          View v = fl.getChildAt(currentCardIndex);
-          v.setTranslationY(-cardHeight / 2.0f * currentValue);
-          if (currentValue == 1 && isMoveLine) {
-            lineView.setOnEndListener(this::showMoveText);
-            lineView.startAnim();
-          }
-        });
-    animator.setDuration(300);
-    animator.start();
-  }
-
-  private void showMoveText() {
-    ObjectAnimator animator = ObjectAnimator.ofFloat(tv_move, "alpha", 0, 1);
-    animator.setDuration(300);
-    animator.addUpdateListener(
-        animation -> {
-          if ((float) animation.getAnimatedValue() == 1) {
-            fl.setCanClickMid(true);
-          }
-        });
-    animator.start();
+    if (newRotation < minAngle) {
+      mPreDistance = (float) (minAngle * 2 * Math.PI * r / 360);
+      return minAngle;
+    }
+    return newRotation;
   }
 
   private float getTransY(int i, float currentValue) {

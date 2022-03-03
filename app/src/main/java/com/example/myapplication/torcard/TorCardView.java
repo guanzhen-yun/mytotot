@@ -10,9 +10,6 @@ public class TorCardView extends androidx.appcompat.widget.AppCompatImageView {
   private float lastestTranX;
   private float lastestTranY;
   private float lastestRotation;
-  private boolean isMiddle;
-
-  private float downX;
 
   public TorCardView(Context context) {
     super(context);
@@ -50,29 +47,23 @@ public class TorCardView extends androidx.appcompat.widget.AppCompatImageView {
     this.lastestRotation = lastestRotation;
   }
 
-  public boolean isMiddle() {
-    return isMiddle;
-  }
-
-  public void setMiddle(boolean middle) {
-    isMiddle = middle;
-  }
-
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
         if (getRotation() == 0) {
-          downX = event.getX();
           return true;
         }
         break;
+      case MotionEvent.ACTION_MOVE:
+        getParent().requestDisallowInterceptTouchEvent(false);
+        return false;
       case MotionEvent.ACTION_UP:
         if (onClickChildListener != null
             && getRotation() == 0
-            && Math.abs(downX - event.getX()) < 5
             && ((TorCardParent) getParent()).isCanClickMid()) {
           onClickChildListener.clickChild();
+          return true;
         }
         break;
     }
